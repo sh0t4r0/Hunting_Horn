@@ -1,6 +1,7 @@
 services:
   - type: web
     name: discord-active-badge-bot
-    env: docker
+    env: python
     plan: free
-    dockerfilePath: ./Dockerfile
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
