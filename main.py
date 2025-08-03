@@ -1,31 +1,30 @@
 import os
 import discord
 from discord.ext import commands, tasks
-from discord import option
 import requests
 import datetime
 
 TOKEN = os.getenv("DISCORD_TOKEN")
-GUILD_ID = os.getenv("GUILD_ID")
+GUILD_ID = int(os.getenv("GUILD_ID"))
 APP_ID = os.getenv("APP_ID")
-CHANNEL_ID = os.getenv("CHANNEL_ID")  # Where to run slash command
+CHANNEL_ID = os.getenv("CHANNEL_ID")
 
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 @bot.event
 async def on_ready():
-    print(f"✅ Bot connected as {bot.user}")
+    print(f"✅ Logged in as {bot.user}")
     if not auto_ping.is_running():
         auto_ping.start()
 
-@bot.slash_command(name="ping", description="Replies with Pong!", guild_ids=[int(GUILD_ID)])
+@bot.slash_command(name="ping", description="Replies with Pong!", guild_ids=[GUILD_ID])
 async def ping(ctx):
     await ctx.respond("🏓 Pong!")
 
-@tasks.loop(hours=360)  # Every 15 days (approx)
+@tasks.loop(hours=360)  # every ~15 days
 async def auto_ping():
-    url = "https://discord.com/api/v10/interactions"
+    print("⚡ Auto-ping running...")
     headers = {
         "Authorization": f"Bot {TOKEN}",
         "Content-Type": "application/json"
@@ -40,7 +39,7 @@ async def auto_ping():
             "type": 1
         }
     }
-    response = requests.post(url, headers=headers, json=payload)
-    print(f"[{datetime.datetime.now()}] Auto ping: {response.status_code} - {response.text}")
+    response = requests.post("https://discord.com/api/v10/interactions", headers=headers, json=payload)
+    print(f"[{datetime.datetime.now()}] Auto-ping: {response.status_code} {response.text}")
 
 bot.run(TOKEN)
